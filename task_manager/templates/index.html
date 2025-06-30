@@ -1,0 +1,523 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Task Manager</title>
+    <style>
+        :root {
+            --bg-gradient-start: #f5f7fa;
+            --bg-gradient-end: #c3cfe2;
+            --text-color: #34495e;
+            --container-bg: #ffffff;
+            --completed-text: #7f8c8d;
+            --input-border: #ecf0f1;
+            --focus-border: #3498db;
+            --add-btn-bg: #2ecc71;
+            --add-btn-hover: #27ae60;
+            --toggle-btn-bg: #3498db;
+            --toggle-btn-hover: #2980b9;
+            --delete-btn-bg: #e74c3c;
+            --delete-btn-hover: #c0392b;
+        }
+
+        [data-theme="dark"] {
+            --bg-gradient-start: #2c3e50;
+            --bg-gradient-end: #34495e;
+            --text-color: #ecf0f1;
+            --container-bg: #1a252f;
+            --completed-text: #bdc3c7;
+            --input-border: #34495e;
+            --focus-border: #81d4fa;
+            --add-btn-bg: #27ae60;
+            --add-btn-hover: #2ecc71;
+            --toggle-btn-bg: #2980b9;
+            --toggle-btn-hover: #3498db;
+            --delete-btn-bg: #c0392b;
+            --delete-btn-hover: #e74c3c;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, var(--bg-gradient-start) 0%, var(--bg-gradient-end) 100%);
+            min-height: 100vh;
+            color: var(--text-color);
+            transition: all 0.3s ease;
+            height: 100vh;
+            overflow: hidden;
+            padding: 20px;
+        }
+
+        .content {
+            width: 100%;
+            max-width: 1200px;
+            margin: 0 auto;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            padding: 20px;
+        }
+
+        h1 {
+            text-align: center;
+            color: var(--text-color);
+            margin-bottom: 20px;
+            font-size: 2.5em;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+
+        .controls {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+
+        input[type="text"],
+        input[type="search"] {
+            flex: 1;
+            padding: 12px 15px;
+            font-size: 1em;
+            border: 2px solid var(--input-border);
+            border-radius: 8px;
+            outline: none;
+            color: var(--text-color);
+            background: var(--container-bg);
+            transition: border-color 0.2s ease;
+            min-width: 200px;
+        }
+
+        input[type="text"]:focus,
+        input[type="search"]:focus {
+            border-color: var(--focus-border);
+        }
+
+        button {
+            padding: 12px 25px;
+            font-size: 1em;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: transform 0.2s, background-color 0.2s;
+        }
+
+        button:hover {
+            transform: scale(1.05);
+        }
+
+        .add-btn {
+            background-color: var(--add-btn-bg);
+            color: white;
+        }
+
+        .add-btn:hover {
+            background-color: var(--add-btn-hover);
+        }
+
+        ul {
+            list-style: none;
+            padding: 0;
+            flex: 1;
+            overflow-y: auto;
+            margin-bottom: 20px;
+        }
+
+        li {
+            background: var(--container-bg);
+            padding: 15px;
+            margin-bottom: 10px;
+            border-radius: 8px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+            animation: slideIn 0.3s ease-out;
+        }
+
+        @keyframes slideIn {
+            from { transform: translateX(-20px); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+
+        .completed {
+            text-decoration: line-through;
+            color: var(--completed-text);
+        }
+
+        .task-text {
+            font-size: 1.2em;
+            color: var(--text-color);
+            max-width: 70%;
+            word-break: break-word;
+            min-height: 1.5em;
+        }
+
+        .actions {
+            display: flex;
+            gap: 5px;
+        }
+
+        .actions button {
+            padding: 8px;
+            font-size: 1em;
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .toggle-btn {
+            background-color: var(--toggle-btn-bg);
+        }
+
+        .toggle-btn:hover {
+            background-color: var(--toggle-btn-hover);
+        }
+
+        .delete-btn {
+            background-color: var(--delete-btn-bg);
+        }
+
+        .delete-btn:hover {
+            background-color: var(--delete-btn-hover);
+        }
+
+        .task-count {
+            text-align: center;
+            font-size: 1.1em;
+            color: var(--text-color);
+            margin-bottom: 20px;
+        }
+
+        footer {
+            text-align: center;
+            font-size: 0.9em;
+            color: var(--text-color);
+            padding: 10px 0;
+            position: fixed;
+            bottom: 10px;
+            width: 100%;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        @media (max-width: 480px) {
+            h1 {
+                font-size: 1.8em;
+                margin-bottom: 15px;
+            }
+            .controls {
+                flex-direction: column;
+            }
+            input[type="text"],
+            input[type="search"],
+            button {
+                padding: 10px;
+                font-size: 0.9em;
+                width: 100%;
+            }
+            .task-text {
+                font-size: 1em;
+            }
+            .actions button {
+                width: 35px;
+                height: 35px;
+                padding: 6px;
+            }
+            footer {
+                font-size: 0.8em;
+                bottom: 5px;
+            }
+        }
+
+        @media (min-width: 481px) and (max-width: 768px) {
+            h1 {
+                font-size: 2.2em;
+            }
+            .controls {
+                flex-direction: column;
+            }
+            input[type="text"],
+            input[type="search"],
+            button {
+                padding: 12px;
+            }
+            .task-text {
+                font-size: 1.1em;
+            }
+            footer {
+                font-size: 0.85em;
+            }
+        }
+
+        @media (min-width: 769px) {
+            .controls {
+                flex-wrap: nowrap;
+            }
+            footer {
+                font-size: 0.9em;
+            }
+        }
+
+        .loading {
+            opacity: 0.5;
+            pointer-events: none;
+        }
+
+        /* New Toggle Button Styles */
+        @import url("https://fonts.googleapis.com/css2?family=Montserrat&display=swap");
+
+        .checkbox {
+            opacity: 0;
+            position: absolute;
+        }
+
+        .checkbox-label {
+            background-color: #111;
+            width: 50px;
+            height: 26px;
+            border-radius: 50px;
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 5px;
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            z-index: 1000;
+            font-family: "Montserrat", sans-serif;
+        }
+
+        .theme-toggle .checkbox-label .fa-moon {
+            color: #f1c40f;
+            font-size: 16px;
+            z-index: 0;
+        }
+
+        .theme-toggle .checkbox-label .fa-sun {
+            color: #f39c12;
+            font-size: 16px;
+            z-index: 0;
+        }
+
+        .checkbox-label .ball {
+            background-color: #fff;
+            width: 22px;
+            height: 22px;
+            position: absolute;
+            left: 2px;
+            top: 2px;
+            border-radius: 50%;
+            transition: transform 0.2s linear;
+            z-index: 1;
+        }
+
+        .checkbox:checked + .checkbox-label .ball {
+            transform: translateX(24px);
+        }
+    </style>
+</head>
+<body>
+    <div class="content">
+        <h1>Task Manager</h1>
+        <div class="controls">
+            <form id="task-form" onsubmit="addTask(event)">
+                <input type="text" id="task-input" name="task" placeholder="Enter a new task" required maxlength="30">
+                <button type="submit" class="add-btn">Add Task</button>
+            </form>
+            <input type="search" id="search-input" placeholder="Search tasks..." oninput="filterTasks()">
+        </div>
+        <div class="task-count" id="task-count">Tasks: 0 / 0 Completed</div>
+        <ul id="task-list">
+            {% for task in tasks %}
+            <li class="{{ 'completed' if task.completed else '' }}" data-id="{{ task.id|default('0') }}">
+                <span class="task-text">{{ task.description }}</span>
+                <div class="actions">
+                    <button class="toggle-btn" data-id="{{ task.id|default('0') }}">✅</button>
+                    <button class="delete-btn" data-id="{{ task.id|default('0') }}">❌</button>
+                </div>
+            </li>
+            {% endfor %}
+        </ul>
+        <footer>© pavan thrikoti pottupalli</footer>
+    </div>
+    <!-- New Toggle Button -->
+    <div class="theme-toggle">
+        <input type="checkbox" class="checkbox" id="checkbox">
+        <label for="checkbox" class="checkbox-label">
+            <i class="fas fa-moon"></i>
+            <i class="fas fa-sun"></i>
+            <span class="ball"></span>
+        </label>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/js/all.min.js" crossorigin="anonymous"></script>
+    <script>
+        let isDarkMode = false;
+
+        function toggleTheme() {
+            isDarkMode = !isDarkMode;
+            document.body.setAttribute('data-theme', isDarkMode ? 'dark' : '');
+        }
+
+        const checkbox = document.getElementById("checkbox");
+        checkbox.addEventListener("change", () => {
+            toggleTheme();
+        });
+
+        async function addTask(event) {
+            event.preventDefault();
+            const taskInput = document.getElementById('task-input');
+            const taskDescription = taskInput.value.trim();
+            const content = document.querySelector('.content');
+
+            if (taskDescription && taskDescription.length <= 30) {
+                content.classList.add('loading');
+                try {
+                    const response = await fetch('/add', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                        body: `task=${encodeURIComponent(taskDescription)}`
+                    });
+                    if (response.ok) {
+                        taskInput.value = '';
+                        await updateTaskList();
+                    } else {
+                        throw new Error('Failed to add task: ' + await response.text());
+                    }
+                } catch (error) {
+                    console.error(error.message);
+                    alert('Error adding task. Please try again.');
+                } finally {
+                    content.classList.remove('loading');
+                }
+            }
+        }
+
+        document.addEventListener('click', async (event) => {
+            const toggleBtn = event.target.closest('.toggle-btn');
+            const deleteBtn = event.target.closest('.delete-btn');
+
+            if (toggleBtn) {
+                const id = toggleBtn.getAttribute('data-id');
+                await toggleTask(event, id);
+            } else if (deleteBtn) {
+                const id = deleteBtn.getAttribute('data-id');
+                await deleteTask(event, id);
+            }
+        });
+
+        async function toggleTask(event, id) {
+            event.preventDefault();
+            console.log('Toggling task with ID:', id); // Debug log
+            if (!id || id === 'undefined' || id === '0') {
+                console.error('Invalid task ID:', id);
+                alert('Error: Invalid task ID. Please refresh the page or check backend data.');
+                return;
+            }
+            const content = document.querySelector('.content');
+            content.classList.add('loading');
+            try {
+                const response = await fetch(`/toggle/${encodeURIComponent(id)}`, { method: 'PUT' });
+                if (response.ok) {
+                    await updateTaskList();
+                } else {
+                    throw new Error('Failed to toggle task: ' + await response.text());
+                }
+            } catch (error) {
+                console.error(error.message);
+                alert('Error toggling task. Please try again.');
+            } finally {
+                content.classList.remove('loading');
+            }
+        }
+
+        async function deleteTask(event, id) {
+            event.preventDefault();
+            console.log('Deleting task with ID:', id); // Debug log
+            if (!id || id === 'undefined' || id === '0') {
+                console.error('Invalid task ID:', id);
+                alert('Error: Invalid task ID. Please refresh the page or check backend data.');
+                return;
+            }
+            const content = document.querySelector('.content');
+            content.classList.add('loading');
+            try {
+                const response = await fetch(`/delete/${encodeURIComponent(id)}`, { method: 'DELETE' });
+                if (response.ok) {
+                    await updateTaskList();
+                } else {
+                    throw new Error('Failed to delete task: ' + await response.text());
+                }
+            } catch (error) {
+                console.error(error.message);
+                alert('Error deleting task. Please try again.');
+            } finally {
+                content.classList.remove('loading');
+            }
+        }
+
+        async function updateTaskList() {
+            const response = await fetch('/tasks');
+            if (response.ok) {
+                const data = await response.json();
+                console.log('Fetched tasks:', data); // Debug log
+                const taskList = document.getElementById('task-list');
+                taskList.innerHTML = '';
+
+                const completedTasks = data.filter(task => task.completed);
+                const incompleteTasks = data.filter(task => !task.completed);
+
+                const orderedTasks = [...incompleteTasks, ...completedTasks];
+
+                orderedTasks.forEach(task => {
+                    const li = document.createElement('li');
+                    li.className = task.completed ? 'completed' : '';
+                    li.setAttribute('data-id', task.id || '0');
+                    li.innerHTML = `
+                        <span class="task-text">${task.description}</span>
+                        <div class="actions">
+                            <button class="toggle-btn" data-id="${task.id || '0'}">✅</button>
+                            <button class="delete-btn" data-id="${task.id || '0'}">❌</button>
+                        </div>
+                    `;
+                    taskList.appendChild(li);
+                });
+
+                updateTaskCount(data);
+            } else {
+                console.error('Failed to fetch tasks:', await response.text());
+                alert('Error loading tasks. Please try again.');
+            }
+        }
+
+        function updateTaskCount(tasks) {
+            const completedCount = tasks.filter(task => task.completed).length;
+            const totalCount = tasks.length;
+            document.getElementById('task-count').textContent = `Tasks: ${totalCount} / ${completedCount} Completed`;
+        }
+
+        function filterTasks() {
+            const searchInput = document.getElementById('search-input').value.toLowerCase();
+            const taskList = document.getElementById('task-list');
+            const tasks = taskList.getElementsByTagName('li');
+
+            for (let task of tasks) {
+                const taskText = task.querySelector('.task-text').textContent.toLowerCase();
+                task.style.display = taskText.includes(searchInput) ? '' : 'none';
+            }
+        }
+
+        window.onload = updateTaskList;
+    </script>
+</body>
+</html>
