@@ -55,6 +55,5 @@ def delete_task(task_id):
     tasks = [task for task in tasks if task.get('id') != task_id]
     save_tasks(tasks)
     return jsonify(tasks)
-
 if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=5000)
+    app.run(debug=True)
